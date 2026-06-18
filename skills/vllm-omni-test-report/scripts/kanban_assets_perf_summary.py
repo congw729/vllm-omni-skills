@@ -270,10 +270,23 @@ def _model_type(model: str, test_name: str) -> str:
 
 def _config_view(rec: dict[str, Any], model_type: str) -> str:
     def _v(key: str) -> str:
+        if key == "qps":
+            return _request_rate_view(rec)
         value = rec.get(key)
         if value is None:
             return ""
         return str(value).strip()
+
+    def _request_rate_view(item: dict[str, Any]) -> str:
+        for key in ("qps", "request_rate", "request-rate"):
+            value = item.get(key)
+            if value is None:
+                continue
+            text = str(value).strip()
+            if not text or text.lower() in ("inf", "infinity"):
+                continue
+            return text
+        return ""
 
     fields_by_type: dict[str, list[tuple[str, str]]] = {
         "qwen3_omni": [
@@ -282,46 +295,54 @@ def _config_view(rec: dict[str, Any], model_type: str) -> str:
             ("out", "random_output_len"),
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
             ("profile", "omni_metrics_profile"),
         ],
         "qwen3_tts": [
             ("data", "dataset_name"),
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
         ],
         "wan22": [
             ("bench", "benchmark_name"),
             ("data", "dataset_name"),
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
         ],
         "qwen_image": [
             ("bench", "benchmark_name"),
             ("data", "dataset_name"),
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
         ],
         "qwen_image_layered": [
             ("bench", "benchmark_name"),
             ("data", "dataset_name"),
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
         ],
         "qwen_image_edit": [
             ("bench", "benchmark_name"),
             ("data", "dataset_name"),
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
         ],
         "qwen_image_edit_2509": [
             ("bench", "benchmark_name"),
             ("data", "dataset_name"),
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
         ],
         "other": [
             ("c", "max_concurrency"),
             ("n", "num_prompts"),
+            ("qbs", "qps"),
         ],
     }
     pairs: list[str] = []

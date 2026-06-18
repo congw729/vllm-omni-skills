@@ -1422,6 +1422,7 @@ def _normalize_local_perf_result_record(raw: dict[str, Any], source_file: Path) 
         "task": str(bench.get("task") or result.get("task") or raw.get("Task") or ""),
         "max_concurrency": bench.get("max-concurrency", raw.get("max_concurrency")),
         "num_prompts": bench.get("num-prompts", raw.get("num_prompts")),
+        "qps": bench.get("request-rate", bench.get("request_rate", raw.get("request_rate"))),
         "completed_requests": result.get("completed_requests", raw.get("completed")),
         "failed_requests": result.get("failed_requests", raw.get("failed")),
         "date": date,
@@ -1430,7 +1431,7 @@ def _normalize_local_perf_result_record(raw: dict[str, Any], source_file: Path) 
     }
     record["config_key"] = " | ".join(
         str(record.get(field) or "")
-        for field in ("benchmark_name", "dataset_name", "task", "max_concurrency", "num_prompts")
+        for field in ("benchmark_name", "dataset_name", "task", "max_concurrency", "num_prompts", "qps")
     )
 
     _set_scaled_metric(record, "throughput_qps", result.get("throughput_qps"))
