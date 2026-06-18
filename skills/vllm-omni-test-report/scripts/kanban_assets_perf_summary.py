@@ -31,6 +31,11 @@ LOWER_BETTER_HINTS = (
     "duration",
 )
 HIGHER_BETTER_HINTS = ("throughput", "qps", "tps")
+NORMAL_DEGRADATION_THRESHOLD_PCT = 6.0
+
+
+def _empty_perf_status_counts() -> dict[str, int]:
+    return {"pass": 0, "normal": 0, "fail": 0, "n/a": 0}
 
 
 @dataclass
@@ -106,6 +111,16 @@ def _metric_direction(metric: str) -> str:
     if any(h in m for h in LOWER_BETTER_HINTS):
         return "lower_better"
     return "unknown"
+
+
+def _baseline_compare_status(vs_baseline_pct: float | None, direction: str) -> str:
+    if direction == "unknown" or vs_baseline_pct is None:
+        return "n/a"
+    if vs_baseline_pct >= 0:
+        return "pass"
+    if vs_baseline_pct >= -NORMAL_DEGRADATION_THRESHOLD_PCT:
+        return "normal"
+    return "fail"
 
 
 def _history_group_key(
@@ -328,7 +343,7 @@ def _build_perf_rows(records: list[dict[str, Any]]) -> list[PerfRow]:
         date_value = str(rec.get("date") or "")
         for metric, latest, baseline in _iter_metric_pairs(rec):
             direction = _metric_direction(metric)
-            if baseline == 0:
+            if abs(baseline) < 1e-12:
                 vs_pct = None
                 status = "n/a"
             else:
@@ -337,9 +352,7 @@ def _build_perf_rows(records: list[dict[str, Any]]) -> list[PerfRow]:
                     vs_pct = -raw_pct
                 else:
                     vs_pct = raw_pct
-                status = "pass" if vs_pct >= 0 else "fail"
-                if direction == "unknown":
-                    status = "n/a"
+                status = _baseline_compare_status(vs_pct, direction)
             rows.append(
                 PerfRow(
                     model=model,
@@ -458,7 +471,7 @@ def build_assets_perf_summary(
             "assets_dir": "",
             "latest_day": "",
             "rows": [],
-            "summary": {"pass": 0, "fail": 0, "n/a": 0},
+            "summary": _empty_perf_status_counts(),
             "history": {},
             "message": "assets dir is missing: provide --assets-dir or --kanban-repo-root",
             "source": src_meta.__dict__,
@@ -476,7 +489,7 @@ def build_assets_perf_summary(
             "assets_dir": str(resolved_assets_dir),
             "latest_day": "",
             "rows": [],
-            "summary": {"pass": 0, "fail": 0, "n/a": 0},
+            "summary": _empty_perf_status_counts(),
             "history": {},
             "message": "No *_history.json files found.",
             "warnings": warnings,
@@ -500,7 +513,7 @@ def build_assets_perf_summary(
             "assets_dir": str(resolved_assets_dir),
             "latest_day": "",
             "rows": [],
-            "summary": {"pass": 0, "fail": 0, "n/a": 0},
+            "summary": _empty_perf_status_counts(),
             "history": history,
             "message": "No dated records found in history files.",
             "warnings": warnings,
@@ -516,7 +529,7 @@ def build_assets_perf_summary(
     rows = [row for row in rows if row.baseline is not None]
     rows.sort(key=lambda x: (x.model, x.config_key, x.metric))
 
-    summary = {"pass": 0, "fail": 0, "n/a": 0}
+    summary = _empty_perf_status_counts()
     for row in rows:
         summary[row.status] = summary.get(row.status, 0) + 1
 
@@ -592,8 +605,8 @@ def _as_markdown(summary: dict[str, Any]) -> str:
     src = summary.get("source") or {}
     lines = [
         f"- latest day: `{summary.get('latest_day')}`\n"
-        f"- pass/fail/n-a: `{summary['summary'].get('pass', 0)}` / "
-        f"`{summary['summary'].get('fail', 0)}` / `{summary['summary'].get('n/a', 0)}`\n",
+        f"- pass/normal/fail/n-a: `{summary['summary'].get('pass', 0)}` / "
+        f"`{summary['summary'].get('normal', 0)}` / `{summary['summary'].get('fail', 0)}` / `{summary['summary'].get('n/a', 0)}`\n",
         f"- assets dir: `{summary.get('assets_dir') or ''}`",
     ]
     if src.get("repo_root"):
