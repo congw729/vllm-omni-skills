@@ -775,6 +775,147 @@ section.job-fail-bk h2 {
 }
 .btn-gh-open:hover { background: var(--accent-hover); filter: none; }
 /* Nightly report: Buildkite Test / Local Test outer cards + collapsible subcards */
+.nightly-focus {
+  border-top: 4px solid var(--accent);
+  background: linear-gradient(180deg, var(--dashboard-panel-bg) 0%, color-mix(in srgb, var(--accent-tint) 65%, var(--dashboard-panel-bg)) 100%);
+}
+.nightly-focus--fail {
+  border-top-color: var(--dashboard-alert);
+  background: linear-gradient(180deg, var(--dashboard-panel-bg) 0%, color-mix(in srgb, var(--dashboard-alert-bg) 62%, var(--dashboard-panel-bg)) 100%);
+}
+.nightly-focus--normal {
+  border-top-color: var(--dashboard-warning);
+  background: linear-gradient(180deg, var(--dashboard-panel-bg) 0%, color-mix(in srgb, var(--dashboard-warning-bg) 58%, var(--dashboard-panel-bg)) 100%);
+}
+.nightly-focus--ok {
+  border-top-color: var(--dashboard-healthy);
+  background: linear-gradient(180deg, var(--dashboard-panel-bg) 0%, color-mix(in srgb, var(--dashboard-healthy-bg) 62%, var(--dashboard-panel-bg)) 100%);
+}
+.nightly-focus--unknown {
+  border-top-color: var(--unknown-edge);
+}
+.nightly-focus .heading-ico {
+  color: var(--accent);
+}
+.nightly-focus--fail .heading-ico {
+  color: var(--dashboard-alert);
+}
+.nightly-focus--normal .heading-ico {
+  color: var(--dashboard-warning);
+}
+.nightly-focus--ok .heading-ico {
+  color: var(--dashboard-healthy);
+}
+.focus-conclusion {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  font-weight: 720;
+  color: var(--dashboard-text);
+}
+.focus-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.85rem;
+  margin: 0.85rem 0 1rem;
+}
+.focus-card {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--dashboard-border);
+  background: var(--dashboard-panel-bg);
+  padding: 0.85rem 0.95rem;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--dashboard-panel-bg) 65%, transparent);
+}
+.focus-card--fail {
+  border-left: 4px solid var(--dashboard-alert);
+  background: color-mix(in srgb, var(--dashboard-alert-bg) 76%, var(--dashboard-panel-bg));
+}
+.focus-card--ok {
+  border-left: 4px solid var(--dashboard-healthy);
+  background: color-mix(in srgb, var(--dashboard-healthy-bg) 72%, var(--dashboard-panel-bg));
+}
+.focus-card-title {
+  color: var(--dashboard-muted);
+  font-size: 0.78rem;
+  font-weight: 760;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+}
+.focus-card-value {
+  margin-top: 0.2rem;
+  font-size: 1.18rem;
+  font-weight: 820;
+  color: var(--dashboard-text);
+}
+.focus-card-detail {
+  margin-top: 0.15rem;
+  color: var(--dashboard-muted);
+  font-size: 0.84rem;
+}
+.focus-table-title {
+  margin: 1rem 0 0.45rem;
+  color: var(--dashboard-soft-text);
+  font-size: 1rem;
+}
+table.focus-table {
+  table-layout: fixed;
+  font-size: 0.86rem;
+  min-width: 980px;
+}
+table.focus-table th,
+table.focus-table td {
+  padding: 0.48rem 0.55rem;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.35;
+}
+table.focus-table th:nth-child(1),
+table.focus-table td:nth-child(1) {
+  width: 5.8rem;
+}
+table.focus-table th:nth-child(2),
+table.focus-table td:nth-child(2) {
+  width: 13rem;
+}
+table.focus-table th:nth-child(3),
+table.focus-table td:nth-child(3) {
+  width: 6.8rem;
+}
+table.focus-table th:nth-child(4),
+table.focus-table td:nth-child(4) {
+  width: 12rem;
+}
+table.focus-table th:nth-child(5),
+table.focus-table td:nth-child(5) {
+  width: 12rem;
+}
+table.focus-table th:nth-child(6),
+table.focus-table td:nth-child(6) {
+  width: 8rem;
+}
+table.focus-table th:nth-child(7),
+table.focus-table td:nth-child(7),
+table.focus-table th:nth-child(8),
+table.focus-table td:nth-child(8),
+table.focus-table th:nth-child(9),
+table.focus-table td:nth-child(9) {
+  width: 6.4rem;
+  text-align: right;
+  white-space: nowrap;
+}
+table.focus-table th:nth-child(10),
+table.focus-table td:nth-child(10) {
+  width: 5rem;
+  white-space: nowrap;
+}
+.focus-filter-scope .table-scroll {
+  max-height: 13rem;
+  overflow: auto;
+}
+.focus-filter-scope table.focus-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
 .nightly-root.panel {
   margin-bottom: 1.35rem;
 }
