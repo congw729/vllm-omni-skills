@@ -437,18 +437,43 @@ def _github_issue_modal_and_script() -> str:
   }});
 
   function applyPerfFilters(scope) {{
-    var selectors = Array.prototype.slice.call(scope.querySelectorAll("select[data-filter-key]"));
+    var controls = Array.prototype.slice.call(scope.querySelectorAll("select[data-filter-key], input[data-filter-key]"));
     var rows = scope.querySelectorAll('tr[data-perf-row="1"]');
     var empty = scope.querySelector("[data-perf-empty]");
-    if (!selectors.length || !rows.length) return;
+    if (!controls.length || !rows.length) return;
+
+    var scalarControls = [];
+    var checkboxGroups = {{}};
+    controls.forEach(function (control) {{
+      var key = control.getAttribute("data-filter-key") || "";
+      if (!key) return;
+      if (control.type === "checkbox") {{
+        if (!checkboxGroups[key]) checkboxGroups[key] = [];
+        if (control.checked) checkboxGroups[key].push(control.value || "");
+      }} else {{
+        scalarControls.push(control);
+      }}
+    }});
 
     var visibleCount = 0;
     rows.forEach(function (row) {{
       var ok = true;
-      selectors.forEach(function (sel) {{
-        var key = sel.getAttribute("data-filter-key") || "";
-        var val = sel.value || "";
-        if (val && row.getAttribute("data-" + key) !== val) ok = false;
+      scalarControls.forEach(function (control) {{
+        var key = control.getAttribute("data-filter-key") || "";
+        var val = (control.value || "").trim();
+        var rowVal = row.getAttribute("data-" + key) || "";
+        if (!val) return;
+        if (control.tagName.toLowerCase() === "input") {{
+          if (rowVal.toLowerCase().indexOf(val.toLowerCase()) === -1) ok = false;
+        }} else if (rowVal !== val) {{
+          ok = false;
+        }}
+      }});
+      Object.keys(checkboxGroups).forEach(function (key) {{
+        var vals = checkboxGroups[key] || [];
+        if (vals.length && vals.indexOf(row.getAttribute("data-" + key) || "") === -1) {{
+          ok = false;
+        }}
       }});
       row.hidden = !ok;
       if (ok) visibleCount += 1;
@@ -459,9 +484,17 @@ def _github_issue_modal_and_script() -> str:
   }}
 
   document.querySelectorAll("[data-perf-filter-scope]").forEach(function (scope) {{
-    scope.querySelectorAll("select[data-filter-key]").forEach(function (sel) {{
-      sel.addEventListener("change", function () {{
+    scope.querySelectorAll("select[data-filter-key], input[data-filter-key]").forEach(function (control) {{
+      var eventName = control.tagName.toLowerCase() === "input" && control.type !== "checkbox" ? "input" : "change";
+      control.addEventListener(eventName, function () {{
         applyPerfFilters(scope);
+      }});
+    }});
+    scope.querySelectorAll("[data-focus-expand]").forEach(function (btn) {{
+      btn.addEventListener("click", function () {{
+        var expanded = scope.classList.toggle("focus-filter-scope--expanded");
+        btn.setAttribute("aria-expanded", expanded ? "true" : "false");
+        btn.textContent = expanded ? "收起表格" : "展开表格";
       }});
     }});
     applyPerfFilters(scope);
@@ -1386,17 +1419,21 @@ def _focus_perf_table_rows(items: list[NightlyFocusItem]) -> list[list[str]]:
 
 def _render_focus_perf_table_html(items: list[NightlyFocusItem]) -> str:
     models = sorted({item.model for item in items if item.model})
-    opts = ['<option value="">All</option>']
+    model_checks = []
     for model in models:
         val = html.escape(model, quote=True)
-        opts.append(f'<option value="{val}">{html.escape(model)}</option>')
+        model_checks.append(
+            '<label class="focus-model-check">'
+            f'<input type="checkbox" data-filter-key="model" value="{val}">'
+            f'<span>{html.escape(model)}</span></label>'
+        )
     parts: list[str] = [
         '<div class="perf-filter-scope focus-filter-scope" data-perf-filter-scope="daily-focus-regressions">',
         '<div class="perf-filter-bar focus-filter-bar">',
-        '<label class="perf-filter-label"><span>Model</span>',
-        '<select class="perf-filter-select" data-filter-key="model">',
-        "".join(opts),
-        "</select></label>",
+        '<fieldset class="focus-model-filter"><legend>Model <span>不勾选 = All</span></legend>',
+        "".join(model_checks),
+        "</fieldset>",
+        '<button type="button" class="focus-expand-btn" data-focus-expand="0" aria-expanded="false">展开表格</button>',
         "</div>",
         '<div class="table-scroll">',
         '<table class="summary focus-table">',

@@ -911,10 +911,50 @@ table.focus-table td:nth-child(10) {
   max-height: 13rem;
   overflow: auto;
 }
+.focus-filter-scope--expanded .table-scroll {
+  max-height: none;
+}
 .focus-filter-scope table.focus-table th {
   position: sticky;
   top: 0;
   z-index: 1;
+}
+.focus-model-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.7rem;
+  max-width: min(58rem, 100%);
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--dashboard-border) 82%, var(--ci) 18%);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--dashboard-panel-bg) 86%, var(--ci-soft) 14%);
+}
+.focus-model-filter legend {
+  padding: 0 0.25rem;
+  color: var(--dashboard-muted);
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+.focus-model-filter legend span {
+  font-weight: 520;
+}
+.focus-model-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 18rem;
+  color: var(--dashboard-text);
+  font-size: 0.82rem;
+  font-weight: 640;
+}
+.focus-model-check input {
+  margin: 0;
+  flex-shrink: 0;
+}
+.focus-model-check span {
+  overflow-wrap: anywhere;
 }
 .nightly-root.panel {
   margin-bottom: 1.35rem;
@@ -1128,7 +1168,8 @@ details.local-summary-dim[open] > summary.local-summary-dim-summary::before {
   font-weight: 720;
   color: var(--dashboard-muted);
 }
-.perf-filter-select {
+.perf-filter-select,
+.perf-filter-input {
   min-height: 2rem;
   max-width: min(22rem, 70vw);
   padding: 0.35rem 2rem 0.35rem 0.55rem;
@@ -1138,9 +1179,25 @@ details.local-summary-dim[open] > summary.local-summary-dim-summary::before {
   color: var(--dashboard-text);
   font: inherit;
 }
-.perf-filter-select:focus {
+.perf-filter-select:focus,
+.perf-filter-input:focus {
   outline: 2px solid color-mix(in srgb, var(--ci) 45%, transparent);
   outline-offset: 2px;
+}
+.focus-expand-btn {
+  min-height: 2rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--dashboard-border));
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--accent-tint) 72%, var(--dashboard-panel-bg));
+  color: var(--accent-hover);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 720;
+}
+.focus-expand-btn:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-tint) 45%, var(--dashboard-panel-bg));
 }
 .perf-filter-table td,
 .perf-filter-table th {
